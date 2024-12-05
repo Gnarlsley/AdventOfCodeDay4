@@ -28,7 +28,7 @@ public class App {
     public static String[] getText(){
         String[] wordList = new String[140];
         try{
-            File puzzle = new File("");
+            File puzzle = new File("C:\\Users\\grran\\development\\AdventOfCode2024\\Day4\\CeresSearch\\src\\res\\puzzle.txt");
             Scanner sc = new Scanner(puzzle);
             for (int i = 0; i < wordList.length && sc.hasNextLine(); i++){
                 wordList[i] = sc.nextLine();
