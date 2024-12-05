@@ -2,6 +2,7 @@ package main;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.Arrays;
 public class App {
     static String[] wordList = getText();
     static int length = wordList[0].length();
@@ -18,27 +19,16 @@ public class App {
     static char bottomleft = '\u0000';
     static char bottomright = '\u0000';
     static int total = 0;
+    static int count = 0;
     public static void main(String[] args) throws Exception {
-        for (int i = 0; i < wordList.length; i++){
-            checkVerticalBounds(i);
-            for (int j = 0; j < length; j++){
-                char currLetter = getLetter(i,j);
-                checkHorizontalBounds(j, length);
-                if (currLetter != 'X'){
-                    continue;
-                }
-                else{
-                    total += getSurroundingLetters(i, j);
-                }
-            }
-        }
-        System.out.println(total);
+        //solvePartOne();
+        solvePartTwo();
     }
 
     public static String[] getText(){
         String[] wordList = new String[140];
         try{
-            File puzzle = new File("C:\\Users\\grran\\development\\AdventOfCode2024\\Day4\\CeresSearch\\src\\res\\puzzle.txt");
+            File puzzle = new File("");
             Scanner sc = new Scanner(puzzle);
             for (int i = 0; i < wordList.length && sc.hasNextLine(); i++){
                 wordList[i] = sc.nextLine();
@@ -90,6 +80,8 @@ public class App {
     }
 
     public static int getSurroundingLetters(int i, int j){
+        checkVerticalBounds(i);
+        checkHorizontalBounds(j, length);
         if (prevLine != null) {
             top = getLetter(i - 1, j);
             if (!isRight) {
@@ -122,9 +114,6 @@ public class App {
 
     public static char getLetterWithDirection(int i, int j, int direction){
         char status = '\u0000';
-        if (i < 0 || i >= wordList.length || j < 0 || j >= length) {
-            return 'F';
-        }
         switch(direction){
             case 0:
                 if(!isLeft && prevLine != null){
@@ -258,6 +247,14 @@ public class App {
         }
         return column;
     }
+    
+    public static boolean isOutOfBounds(int row, int col){
+        if(row < 0 || row > 140 || col < 0 || col >= length){
+            return true;
+        }
+        return false;
+    }
+
     public static int checkSurroundingLetters(int index, int j){
         char[] neighbors = new char[8];
         //starts at topleft and goes clockwise
@@ -269,7 +266,6 @@ public class App {
         neighbors[5] = bottom;
         neighbors[6] = bottomleft;
         neighbors[7] = left;
-
         int count = 0;
 
         for (int i = 0; i < neighbors.length; i++){
@@ -283,7 +279,7 @@ public class App {
             if (neighbors[i] == 'M'){
                 int row = returnCurrentRowWithDirection(index, i);
                 int col = returnCurrentColumnWithDirection(j, i);
-                if (row < 0 || col < 0 || col > 140 || row > 140){
+                if(isOutOfBounds(row,col)){
                     continue;
                 }
                 checkVerticalBounds(row);
@@ -295,12 +291,11 @@ public class App {
                 else{
                     row = returnCurrentRowWithDirection(row, i);
                     col = returnCurrentColumnWithDirection(col, i);
-                    if (row < 0 || col < 0 || col > 140 || row > 140){
+                    if(isOutOfBounds(row,col)){
                         continue;
                     }
                     checkVerticalBounds(row);
                     checkHorizontalBounds(col, length);
-
                     status = getLetterWithDirection(row, col, i);
                     if(status == 'S'){
                         count++;
@@ -308,8 +303,90 @@ public class App {
                 }
             }
         }
-        checkVerticalBounds(index);
-        checkHorizontalBounds(j, length);
         return count;
+    }
+
+    public static void solvePartOne(){
+        for (int i = 0; i < wordList.length; i++){
+            for (int j = 0; j < length; j++){
+                char currLetter = getLetter(i,j);
+                if (currLetter != 'X'){
+                    continue;
+                }
+                else{
+                    total += getSurroundingLetters(i, j);
+                }
+            }
+        }
+        System.out.println(total);
+    }
+
+    public static void scanX(int i, int j){
+        checkVerticalBounds(i);
+        checkHorizontalBounds(j, length);
+        if (prevLine != null) {
+            if (!isRight) {
+                topright = getLetter(i - 1, j + 1);
+            }
+            if (!isLeft) {
+                topleft = getLetter(i - 1, j - 1);
+            }
+        }
+    
+        if (nextLine != null) {
+            if (!isRight) {
+                bottomright = getLetter(i + 1, j + 1);
+            }
+            if (!isLeft) {
+                bottomleft = getLetter(i + 1, j - 1);
+            }
+        }
+        char[] leftX = new char[2];
+        leftX[0] = topleft;
+        leftX[1] = bottomright;
+        char[] rightX = new char[2];
+        rightX[0] = topright;
+        rightX[1] = bottomleft;
+        boolean test = checkX(leftX, rightX);
+        if(test){
+            count++;
+        }
+    }
+
+    public static boolean checkX(char[] leftX, char[] rightX){
+        // * . *
+        // . * . leftX is the one pointing \
+        // * . * rightX is the one pointing /
+        char[][] corners = new char[2][];
+        corners[0] = leftX;
+        corners[1] = rightX; 
+        boolean test = false;
+        for (char[] corner : corners){
+            Arrays.sort(corner);
+            int a = Arrays.binarySearch(corner, 'M');
+            int b = Arrays.binarySearch(corner, 'S');
+            if(a > 0 && b > 0){
+                test = true;
+            } else{
+                break;
+            }
+        }
+
+        return test;
+    }
+
+    public static void solvePartTwo(){
+        for (int i = 0; i < wordList.length; i++){
+            for (int j = 0; j < length; j++){
+                char currLetter = getLetter(i,j);
+                if (currLetter != 'X'){
+                    continue;
+                }
+                else{
+                    scanX(i,j);
+                }
+            }
+        }
+        System.out.println(count);
     }
 }
