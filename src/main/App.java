@@ -21,7 +21,7 @@ public class App {
     static int total = 0;
     static int count = 0;
     public static void main(String[] args) throws Exception {
-        //solvePartOne();
+        solvePartOne();
         solvePartTwo();
     }
 
@@ -318,7 +318,7 @@ public class App {
                 }
             }
         }
-        System.out.println(total);
+        System.out.println("The answer for part 1: " + total);
     }
 
     public static void scanX(int i, int j){
@@ -347,39 +347,36 @@ public class App {
         char[] rightX = new char[2];
         rightX[0] = topright;
         rightX[1] = bottomleft;
-        boolean test = checkX(leftX, rightX);
-        if(test){
+        if(checkX(leftX,rightX)){
             count++;
         }
+        bottomleft = 'X';
+        bottomright = 'X';
+        topleft = 'X';
+        topright = 'X';
     }
 
     public static boolean checkX(char[] leftX, char[] rightX){
         // * . *
         // . * . leftX is the one pointing \
         // * . * rightX is the one pointing /
-        char[][] corners = new char[2][];
-        corners[0] = leftX;
-        corners[1] = rightX; 
-        boolean test = false;
-        for (char[] corner : corners){
-            Arrays.sort(corner);
-            int a = Arrays.binarySearch(corner, 'M');
-            int b = Arrays.binarySearch(corner, 'S');
-            if(a > 0 && b > 0){
-                test = true;
-            } else{
-                break;
-            }
+        boolean hasML = false, hasSL = false, hasMR = false, hasSR = false;
+        for (char c : leftX) {
+            if (c == 'M') hasML = true;
+            if (c == 'S') hasSL = true;
         }
-
-        return test;
+        for (char c : rightX) {
+            if (c == 'M') hasMR = true;
+            if (c == 'S') hasSR = true;
+        }
+        return hasML && hasSL && hasMR && hasSR;
     }
 
     public static void solvePartTwo(){
         for (int i = 0; i < wordList.length; i++){
             for (int j = 0; j < length; j++){
                 char currLetter = getLetter(i,j);
-                if (currLetter != 'X'){
+                if (currLetter != 'A'){
                     continue;
                 }
                 else{
@@ -387,6 +384,6 @@ public class App {
                 }
             }
         }
-        System.out.println(count);
+        System.out.println("The answer for part 2: " + count);
     }
 }
